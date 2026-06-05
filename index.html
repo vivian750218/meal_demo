@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>膳食管理 — Jubo SmartCare</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:14px;color:#2c2c2a;background:#f0f2f4;height:100vh;display:flex;flex-direction:column}
+.layout{display:flex;flex:1;overflow:hidden}
+.sidebar{width:180px;background:#1a7a6e;flex-shrink:0;overflow-y:auto}
+.slogo{padding:14px 14px 10px;border-bottom:1px solid rgba(255,255,255,0.15)}
+.slogo-top{font-size:11px;color:rgba(255,255,255,0.65);letter-spacing:1px}
+.slogo-bot{font-size:17px;font-weight:500;color:#fff}
+.slogo-bot span{color:#a8e6d8}
+.ssec{padding:8px 0}
+.ssec-label{font-size:11px;color:rgba(255,255,255,0.45);padding:5px 14px 3px;letter-spacing:0.5px}
+.sitem{padding:8px 14px;font-size:13px;color:rgba(255,255,255,0.78);cursor:pointer;display:flex;align-items:center;gap:8px}
+.sitem:hover{background:rgba(255,255,255,0.1);color:#fff}
+.sitem.active{background:rgba(255,255,255,0.2);color:#fff;font-weight:500}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{background:#1a7a6e;height:44px;display:flex;align-items:center;padding:0 20px;flex-shrink:0}
+.topbar-title{font-size:15px;font-weight:500;color:#fff;flex:1}
+.topbar-icons{display:flex;gap:8px}
+.topbar-icons i{color:rgba(255,255,255,0.8);font-size:20px;cursor:pointer}
+.topbar-icons i:hover{color:#fff}
+.content{flex:1;overflow-y:auto;padding:20px 24px}
+.pg{display:none}.pg.active{display:block}
+.filter-row{display:flex;align-items:center;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.filter-label{font-size:13px;color:#666;white-space:nowrap}
+.filter-sep{color:#999;padding:0 4px}
+input[type=date]{font-size:13px;padding:6px 10px;border:1px solid #ccc;border-radius:6px;background:#fff;color:#2c2c2a;cursor:pointer}
+.tabs-row{display:flex;align-items:center;border-bottom:2px solid #ddd;margin-bottom:16px}
+.mtab{padding:10px 20px;font-size:14px;cursor:pointer;color:#888;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap}
+.mtab.active{color:#1a7a6e;border-bottom-color:#1a7a6e;font-weight:500}
+.mtab:hover:not(.active){color:#333}
+.toolbar{display:flex;align-items:center;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.ib{position:relative;display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border:1px solid #ccc;border-radius:6px;background:#fff;cursor:pointer;color:#555;flex-shrink:0;transition:all .15s}
+.ib:hover{background:#e8f5f3;color:#1a7a6e;border-color:#1a7a6e}
+.ib.accent{border-color:#1a7a6e;color:#1a7a6e}
+.ib.accent:hover{background:#e8f5f3}
+.ib i{font-size:19px;line-height:1;pointer-events:none}
+.ib .tip{display:none;position:absolute;top:calc(100% + 6px);left:0;background:#2c2c2a;color:#fff;font-size:11px;padding:4px 8px;border-radius:4px;white-space:nowrap;z-index:9999}
+.ib:hover .tip{display:block}
+.ib-div{width:1px;height:22px;background:#ddd;margin:0 4px;flex-shrink:0}
+.week-row{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.week-row label{font-size:13px;color:#666}
+.week-row select{font-size:13px;padding:5px 10px;border:1px solid #ccc;border-radius:6px;background:#fff;color:#2c2c2a;cursor:pointer}
+.week-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+.day-col{border:1px solid #ddd;border-radius:8px;overflow:hidden;background:#fff}
+.day-head{background:#1a7a6e;padding:7px 8px;text-align:center}
+.day-wd{font-size:12px;font-weight:500;color:#fff}
+.day-dt{font-size:11px;color:rgba(255,255,255,0.75);margin-top:2px}
+.day-body{padding:5px}
+.meal-chip{margin:3px 0;padding:6px 7px;border-radius:4px;border-left:2px solid #1a7a6e;background:#f0faf7;cursor:pointer}
+.meal-chip:hover{background:#d6f0ea}
+.chip-type{font-size:10px;font-weight:600;color:#0f5248}
+.chip-name{font-size:11px;color:#2c2c2a;margin-top:2px;line-height:1.3;word-break:break-all}
+.chip-cal{font-size:10px;color:#888;margin-top:2px}
+.add-btn{display:flex;align-items:center;justify-content:center;margin:4px 0;padding:6px;border:1px dashed #bbb;border-radius:4px;cursor:pointer;color:#aaa;gap:4px;font-size:12px}
+.add-btn:hover{background:#e8f5f3;color:#1a7a6e;border-color:#1a7a6e}
+.add-btn i{font-size:14px}
+.meal-list-wrap{background:#fff;border:1px solid #ddd;border-radius:8px;overflow:hidden}
+.meal-date-row{display:flex;align-items:center;padding:10px 16px;border-bottom:1px solid #eee;cursor:pointer;gap:8px;background:#f4f9f8}
+.meal-date-row:hover{background:#e8f5f3}
+.meal-date-lbl{font-size:13px;font-weight:500;color:#0f5248}
+.meal-date-cnt{font-size:11px;color:#1a7a6e;background:#c2e8e1;padding:1px 8px;border-radius:20px}
+.mdchev{margin-left:auto;color:#1a7a6e;font-size:14px;transition:transform .15s}
+.mdchev.open{transform:rotate(180deg)}
+.meal-recs{display:none}.meal-recs.open{display:block}
+.meal-rec-row{display:flex;align-items:center;padding:9px 16px 9px 28px;border-bottom:1px solid #f0f0f0;cursor:pointer;gap:10px;background:#fff}
+.meal-rec-row:last-child{border-bottom:none}
+.meal-rec-row:hover{background:#f8f8f8}
+.rec-time{font-size:12px;color:#888;width:44px;flex-shrink:0}
+.rec-badge{font-size:11px;padding:2px 8px;border-radius:20px;background:#e8f5f3;color:#0f5248;white-space:nowrap;flex-shrink:0}
+.rec-cases{font-size:12px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rec-cal{font-size:12px;color:#888;white-space:nowrap;margin-right:8px}
+.rec-editor{font-size:11px;color:#aaa;white-space:nowrap}
+
+/* PREP PAGE */
+.back-btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:6px;border:1px solid #ccc;background:#fff;color:#666;font-size:13px;cursor:pointer;margin-bottom:16px}
+.back-btn:hover{background:#f5f5f5}
+.prep-filter-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.psel{font-size:13px;padding:6px 10px;border:1px solid #ccc;border-radius:6px;background:#fff;color:#2c2c2a;cursor:pointer}
+.psearch{font-size:13px;padding:6px 10px;border:1px solid #ccc;border-radius:6px;background:#fff;color:#2c2c2a;width:180px}
+
+/* 進食型態多選下拉 */
+.eat-filter-wrap{position:relative;display:inline-block}
+.eat-filter-btn{font-size:13px;padding:6px 10px;border:1px solid #ccc;border-radius:6px;background:#fff;color:#2c2c2a;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;min-width:120px}
+.eat-filter-btn:hover{border-color:#1a7a6e}
+.eat-filter-btn.active-filter{border-color:#1a7a6e;color:#1a7a6e;background:#f0faf7}
+.eat-dropdown{display:none;position:absolute;top:calc(100%+4px);left:0;background:#fff;border:1px solid #ccc;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.12);z-index:500;min-width:200px;padding:8px 0}
+.eat-dropdown.open{display:block}
+.eat-option{display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:pointer;font-size:13px;color:#2c2c2a}
+.eat-option:hover{background:#f0faf7}
+.eat-option input[type=checkbox]{accent-color:#1a7a6e;width:15px;height:15px;cursor:pointer}
+.eat-dropdown-footer{padding:8px 14px;border-top:1px solid #eee;display:flex;justify-content:flex-end;gap:8px}
+.eat-clear-btn{font-size:12px;color:#888;background:none;border:none;cursor:pointer;padding:4px 8px;border-radius:4px}
+.eat-clear-btn:hover{background:#f0f0f0}
+.eat-apply-btn{font-size:12px;color:#fff;background:#1a7a6e;border:none;cursor:pointer;padding:5px 12px;border-radius:4px}
+.eat-apply-btn:hover{background:#145f56}
+
+.prep-list{background:#fff;border:1px solid #ddd;border-radius:8px;overflow:hidden}
+.prep-row{display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid #f0f0f0;gap:14px}
+.prep-row:last-child{border-bottom:none}
+.prep-row:hover{background:#f8f8f8}
+.prep-av{width:44px;height:44px;border-radius:50%;background:#c2e8e1;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:500;color:#0f5248;flex-shrink:0}
+.prep-info{flex:1;min-width:0}
+.prep-id-lbl{font-size:11px;color:#aaa}
+.prep-name-lbl{font-size:14px;font-weight:500;color:#2c2c2a}
+.prep-eat-badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;background:#e8f5f3;color:#0f5248;margin-top:3px}
+.prep-status{font-size:11px;color:#aaa;margin-right:12px;white-space:nowrap}
+.prep-edbtn{padding:6px 16px;border-radius:6px;border:1px solid #1a7a6e;background:#fff;color:#1a7a6e;font-size:13px;cursor:pointer;white-space:nowrap}
+.prep-edbtn:hover{background:#e8f5f3}
+
+/* SNACK */
+.snack{display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#2c2c2a;color:#fff;padding:9px 18px;border-radius:8px;font-size:13px;z-index:99999;white-space:nowrap}
+
+/* DIALOG — position:fixed */
+.dlg-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:10000;align-items:flex-start;justify-content:center;padding-top:60px;overflow-y:auto}
+.dlg-backdrop.open{display:flex}
+.dlg{background:#fff;border-radius:12px;width:520px;max-width:94vw;overflow:hidden;margin-bottom:40px}
+.dlg-hd{padding:18px 22px 14px;border-bottom:1px solid #eee}
+.dlg-title{font-size:16px;font-weight:500;color:#2c2c2a}
+.dlg-body{padding:18px 22px;max-height:60vh;overflow-y:auto}
+.dlg-ft{padding:12px 22px 16px;display:flex;justify-content:flex-end;gap:8px;border-top:1px solid #f0f0f0}
+.dlg-cancel{padding:7px 18px;border-radius:6px;border:none;background:none;color:#1a7a6e;font-size:13px;cursor:pointer}
+.dlg-cancel:hover{background:#e8f5f3}
+.dlg-save{padding:7px 22px;border-radius:6px;border:none;background:#1a7a6e;color:#fff;font-size:13px;cursor:pointer}
+.dlg-save:hover{background:#145f56}
+
+/* 資料輸出 dialog 樣式（較寬，mimics 截圖）*/
+.dlg-export{width:480px}
+.export-field{display:flex;flex-direction:column;gap:5px;margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid #eee}
+.export-field:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.export-field-label{font-size:12px;color:#999}
+.export-field-value{font-size:14px;color:#2c2c2a;display:flex;align-items:center;justify-content:space-between}
+.export-field-value i{color:#aaa;font-size:16px}
+.export-date-row{display:flex;align-items:center;gap:8px}
+.export-date-row input[type=date]{font-size:13px;padding:5px 8px;border:none;border-bottom:1px solid #ccc;border-radius:0;background:transparent;color:#2c2c2a;cursor:pointer}
+.export-date-sep{color:#999;font-size:13px}
+
+/* FORM */
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.frow3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}
+.ffull{margin-bottom:12px}
+.fg{display:flex;flex-direction:column;gap:4px}
+.fl{font-size:12px;color:#666}
+.fl .req{color:#e24b4a}
+.fin{padding:7px 10px;border:1px solid #ccc;border-radius:6px;font-size:13px;background:#fff;color:#2c2c2a;width:100%}
+.fin:focus{outline:none;border-color:#1a7a6e;box-shadow:0 0 0 2px rgba(26,122,110,0.1)}
+.fin.ro{background:#f5f5f5;color:#888;cursor:default}
+.fsec{font-size:11px;font-weight:600;color:#888;letter-spacing:0.5px;padding:8px 0 6px;border-bottom:1px solid #eee;margin-bottom:10px;text-transform:uppercase}
+.ferr{font-size:11px;color:#c00;margin-top:2px;display:none}
+.btn-primary{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:6px;border:none;background:#1a7a6e;color:#fff;font-size:13px;cursor:pointer}
+.btn-primary:hover{background:#145f56}
+.tab-pane{display:none}.tab-pane.active{display:block}
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="slogo"><div class="slogo-top">Jubo</div><div class="slogo-bot"><span>Smart</span>Care</div></div>
+    <div class="ssec">
+      <div class="ssec-label">日常照護</div>
+      <div class="sitem"><i class="ti ti-activity"></i> 生命徵象</div>
+      <div class="sitem"><i class="ti ti-book"></i> 照顧日誌</div>
+      <div class="sitem active"><i class="ti ti-salad"></i> 膳食管理</div>
+      <div class="sitem"><i class="ti ti-droplet"></i> 血糖紀錄</div>
+      <div class="sitem"><i class="ti ti-syringe"></i> 胰島素</div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <span class="topbar-title" id="topbar-title">膳食管理</span>
+      <div class="topbar-icons">
+        <i class="ti ti-home" title="首頁"></i>
+        <i class="ti ti-bell" title="通知"></i>
+        <i class="ti ti-user-circle" title="帳號"></i>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- 膳食管理主頁 -->
+      <div class="pg active" id="pg-dietary">
+        <div class="filter-row">
+          <span class="filter-label">日期區間</span>
+          <input type="date" id="fd-start" value="2025-05-01" onchange="onDateChange()">
+          <span class="filter-sep">—</span>
+          <input type="date" id="fd-end" value="2025-05-31" onchange="onDateChange()">
+        </div>
+
+        <div class="tabs-row">
+          <div class="mtab active" id="tab-w" onclick="switchTab('w')">週菜單</div>
+          <div class="mtab" id="tab-m" onclick="switchTab('m')">用餐紀錄</div>
+        </div>
+
+        <!-- 週菜單 -->
+        <div class="tab-pane active" id="tc-w">
+          <div class="toolbar">
+            <div class="ib" onclick="showSnack('已下載空白範本')">
+              <i class="ti ti-file-download"></i>
+              <span class="tip">下載空白週菜單範本</span>
+            </div>
+            <div class="ib" onclick="showSnack('請選擇 .xlsx 檔案')">
+              <i class="ti ti-file-upload"></i>
+              <span class="tip">匯入週菜單</span>
+            </div>
+            <div class="ib" onclick="openExportDlg()">
+              <i class="ti ti-upload"></i>
+              <span class="tip">資料輸出</span>
+            </div>
+            <div class="ib-div"></div>
+            <div class="ib accent" onclick="showPage('prep')">
+              <i class="ti ti-clipboard-list"></i>
+              <span class="tip">備餐名單</span>
+            </div>
+          </div>
+          <div class="week-row">
+            <label>選擇週別</label>
+            <select id="week-sel" onchange="renderGrid()"></select>
+          </div>
+          <div class="week-grid" id="week-grid"></div>
+        </div>
+
+        <!-- 用餐紀錄 -->
+        <div class="tab-pane" id="tc-m">
+          <div class="toolbar">
+            <button class="btn-primary" onclick="showSnack('前往新增用餐紀錄頁')">
+              <i class="ti ti-plus" style="font-size:14px"></i> 新增用餐紀錄
+            </button>
+            <div class="ib" onclick="openExportDlg()">
+              <i class="ti ti-upload"></i>
+              <span class="tip">資料輸出</span>
+            </div>
+          </div>
+          <div class="meal-list-wrap" id="meal-list"></div>
+        </div>
+      </div>
+
+      <!-- 備餐名單頁 -->
+      <div class="pg" id="pg-prep">
+        <button class="back-btn" onclick="showPage('dietary')">
+          <i class="ti ti-arrow-left" style="font-size:13px"></i> 返回膳食管理
+        </button>
+        <div class="prep-filter-row">
+          <span class="filter-label">組別/區域</span>
+          <select class="psel" id="pf-group" onchange="renderPrep()">
+            <option value="">全機構</option>
+            <option value="A">A區</option>
+            <option value="B">B區</option>
+            <option value="C">C區</option>
+          </select>
+          <span class="filter-label">狀態</span>
+          <select class="psel" id="pf-status" onchange="renderPrep()">
+            <option value="服務中">服務中</option>
+            <option value="">全部</option>
+            <option value="暫停服務">暫停服務</option>
+            <option value="結案">結案</option>
+          </select>
+          <!-- 進食型態多選 -->
+          <div class="eat-filter-wrap" id="eat-filter-wrap">
+            <button class="eat-filter-btn" id="eat-filter-btn" onclick="toggleEatDropdown(event)">
+              <span id="eat-filter-label">全部類型</span>
+              <i class="ti ti-chevron-down" style="font-size:13px;margin-left:auto"></i>
+            </button>
+            <div class="eat-dropdown" id="eat-dropdown">
+              <div class="eat-option"><input type="checkbox" value="一般" onchange="updateEatLabel()"> 一般</div>
+              <div class="eat-option"><input type="checkbox" value="軟質" onchange="updateEatLabel()"> 軟質</div>
+              <div class="eat-option"><input type="checkbox" value="剪碎" onchange="updateEatLabel()"> 剪碎</div>
+              <div class="eat-option"><input type="checkbox" value="剁碎" onchange="updateEatLabel()"> 剁碎</div>
+              <div class="eat-option"><input type="checkbox" value="打泥" onchange="updateEatLabel()"> 打泥</div>
+              <div class="eat-option"><input type="checkbox" value="自製流質" onchange="updateEatLabel()"> 自製流質</div>
+              <div class="eat-option"><input type="checkbox" value="配方流質" onchange="updateEatLabel()"> 配方流質</div>
+              <div class="eat-option"><input type="checkbox" value="其他" onchange="updateEatLabel()"> 其他</div>
+              <div class="eat-option"><input type="checkbox" value="低鹽飲食" onchange="updateEatLabel()"> 低鹽飲食（自訂）</div>
+              <div class="eat-option"><input type="checkbox" value="糖尿病飲食" onchange="updateEatLabel()"> 糖尿病飲食（自訂）</div>
+              <div class="eat-dropdown-footer">
+                <button class="eat-clear-btn" onclick="clearEatFilter()">清除</button>
+                <button class="eat-apply-btn" onclick="applyEatFilter()">套用</button>
+              </div>
+            </div>
+          </div>
+          <input class="psearch" id="pf-search" placeholder="搜尋個案姓名…" oninput="renderPrep()">
+        </div>
+        <div id="prep-active-tags" style="display:none;margin-bottom:10px;display:flex;gap:6px;flex-wrap:wrap"></div>
+        <div class="prep-list" id="prep-list"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- DIALOG: 新增/編輯菜單 -->
+<div class="dlg-backdrop" id="dlg-menu" onclick="onBackdropClick(event,'dlg-menu')">
+  <div class="dlg" onclick="event.stopPropagation()">
+    <div class="dlg-hd"><div class="dlg-title" id="dlg-menu-title">新增菜單</div></div>
+    <div class="dlg-body">
+      <div class="frow">
+        <div class="fg"><label class="fl">日期</label><input class="fin ro" id="mf-date" readonly></div>
+        <div class="fg"><label class="fl">用餐星期</label><input class="fin ro" id="mf-wd" readonly></div>
+      </div>
+      <div class="ffull">
+        <div class="fg">
+          <label class="fl">餐別 <span class="req">*</span></label>
+          <select class="fin" id="mf-type">
+            <option value="">請選擇</option>
+            <option>早餐</option><option>早點</option><option>午餐</option>
+            <option>午點</option><option>晚餐</option><option>晚點</option>
+          </select>
+          <span class="ferr" id="mf-type-err">請選擇餐別</span>
+        </div>
+      </div>
+      <div class="fsec">菜色內容</div>
+      <div class="frow">
+        <div class="fg"><label class="fl">主食 <span class="req">*</span></label><input class="fin" id="mf-main" placeholder="例：白飯、稀飯"><span class="ferr" id="mf-main-err">請填寫主食</span></div>
+        <div class="fg"><label class="fl">主菜</label><input class="fin" id="mf-dish1" placeholder="例：蒸蛋佐肉燥"></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label class="fl">副菜一</label><input class="fin" id="mf-side1"></div>
+        <div class="fg"><label class="fl">副菜二</label><input class="fin" id="mf-side2"></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label class="fl">時蔬</label><input class="fin" id="mf-veg" placeholder="例：炒高麗菜"></div>
+        <div class="fg"><label class="fl">甜點</label><input class="fin" id="mf-dessert"></div>
+      </div>
+      <div class="fsec">營養成分</div>
+      <div class="frow3">
+        <div class="fg"><label class="fl">熱量 (大卡)</label><input class="fin" id="mf-cal" type="number" step="0.1" placeholder="0.0"></div>
+        <div class="fg"><label class="fl">蛋白質 (g)</label><input class="fin" id="mf-pro" type="number" step="0.1" placeholder="0.0"></div>
+        <div class="fg"><label class="fl">脂肪 (g)</label><input class="fin" id="mf-fat" type="number" step="0.1" placeholder="0.0"></div>
+      </div>
+      <div class="frow3">
+        <div class="fg"><label class="fl">碳水化合物 (g)</label><input class="fin" id="mf-carb" type="number" step="0.1" placeholder="0.0"></div>
+        <div class="fg"><label class="fl">鈉 (mg)</label><input class="fin" id="mf-na" type="number" step="0.1" placeholder="0.0"></div>
+        <div class="fg"><label class="fl">膳食纖維 (g)</label><input class="fin" id="mf-fiber" type="number" step="0.1" placeholder="0.0"></div>
+      </div>
+      <div class="ffull"><div class="fg"><label class="fl">最後編輯者</label><input class="fin ro" id="mf-editor" readonly></div></div>
+    </div>
+    <div class="dlg-ft">
+      <button class="dlg-cancel" onclick="closeDlg('dlg-menu')">取消</button>
+      <button class="dlg-save" onclick="saveMenu()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- DIALOG: 資料輸出 -->
+<div class="dlg-backdrop" id="dlg-export" onclick="onBackdropClick(event,'dlg-export')">
+  <div class="dlg dlg-export" onclick="event.stopPropagation()">
+    <div class="dlg-hd"><div class="dlg-title">資料輸出</div></div>
+    <div class="dlg-body">
+      <div class="export-field">
+        <div class="export-field-label">連結表單</div>
+        <div class="export-field-value">
+          <span>膳食管理</span>
+          <i class="ti ti-chevron-right"></i>
+        </div>
+      </div>
+      <div class="export-field">
+        <div class="export-field-label">個案</div>
+        <div class="export-field-value">
+          <span id="export-case-label">全部個案</span>
+        </div>
+      </div>
+      <div class="export-field" style="border-bottom:none">
+        <div class="export-field-label">資料範圍 <span style="color:#e24b4a">*</span></div>
+        <div class="export-date-row" style="margin-top:6px">
+          <input type="date" id="exp-start" value="2025-05-01">
+          <i class="ti ti-calendar" style="color:#aaa;font-size:16px"></i>
+          <span class="export-date-sep">—</span>
+          <input type="date" id="exp-end" value="2025-05-31">
+          <i class="ti ti-calendar" style="color:#aaa;font-size:16px"></i>
+        </div>
+      </div>
+    </div>
+    <div class="dlg-ft">
+      <button class="dlg-cancel" onclick="closeDlg('dlg-export')">取消</button>
+      <button class="dlg-save" onclick="showSnack('資料輸出中…');closeDlg('dlg-export')">確定，並輸出</button>
+    </div>
+  </div>
+</div>
+
+<!-- DIALOG: 用餐紀錄詳細 -->
+<div class="dlg-backdrop" id="dlg-rec" onclick="onBackdropClick(event,'dlg-rec')">
+  <div class="dlg" onclick="event.stopPropagation()">
+    <div class="dlg-hd"><div class="dlg-title" id="dlg-rec-title">用餐紀錄</div></div>
+    <div class="dlg-body">
+      <div class="frow">
+        <div class="fg"><label class="fl">用餐日期</label><input class="fin ro" id="rd-date" readonly></div>
+        <div class="fg"><label class="fl">用餐時間</label><input class="fin ro" id="rd-time" readonly></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label class="fl">餐別</label><input class="fin ro" id="rd-type" readonly></div>
+        <div class="fg"><label class="fl">用餐個案</label><input class="fin ro" id="rd-cases" readonly></div>
+      </div>
+      <div class="fsec">餐點</div>
+      <div class="frow">
+        <div class="fg"><label class="fl">菜色類別</label><input class="fin ro" id="rd-cat" readonly></div>
+        <div class="fg"><label class="fl">項目</label><input class="fin ro" id="rd-item" readonly></div>
+      </div>
+      <div class="ffull"><div class="fg"><label class="fl">菜色描述</label><textarea class="fin ro" id="rd-desc" rows="2" readonly style="resize:none"></textarea></div></div>
+      <div class="fsec">營養成分</div>
+      <div class="frow3">
+        <div class="fg"><label class="fl">熱量 (大卡)</label><input class="fin ro" id="rd-cal" readonly></div>
+        <div class="fg"><label class="fl">蛋白質 (g)</label><input class="fin ro" id="rd-pro" readonly></div>
+        <div class="fg"><label class="fl">脂肪 (g)</label><input class="fin ro" id="rd-fat" readonly></div>
+      </div>
+      <div class="frow3">
+        <div class="fg"><label class="fl">碳水化合物 (g)</label><input class="fin ro" id="rd-carb" readonly></div>
+        <div class="fg"><label class="fl">鈉 (mg)</label><input class="fin ro" id="rd-na" readonly></div>
+        <div class="fg"><label class="fl">膳食纖維 (g)</label><input class="fin ro" id="rd-fiber" readonly></div>
+      </div>
+      <div class="ffull"><div class="fg"><label class="fl">最後編輯者</label><input class="fin ro" id="rd-editor" readonly></div></div>
+    </div>
+    <div class="dlg-ft">
+      <button class="dlg-cancel" onclick="closeDlg('dlg-rec')">關閉</button>
+      <button class="dlg-save" onclick="showSnack('前往編輯頁面');closeDlg('dlg-rec')">
+        <i class="ti ti-edit" style="font-size:13px"></i> 編輯
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="snack" id="snack"></div>
+
+<script>
+const WDS=['一','二','三','四','五','六','日'];
+function getMonday(d){const dt=new Date(d);const day=dt.getDay();dt.setDate(dt.getDate()+(day===0?-6:1-day));return dt}
+function fmtDate(d){return d.toISOString().slice(0,10)}
+function fmtMD(d){return String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getDate()).padStart(2,'0')}
+
+let menuData={};
+function mk(ds,t){return ds+'|'+t}
+[
+  {date:'2025-05-26',type:'早餐',main:'燕麥粥',dish1:'水煮蛋',veg:'',cal:380,pro:14,fat:8,carb:62,na:280,fiber:3.2,editor:'系統預設'},
+  {date:'2025-05-26',type:'午餐',main:'白飯',dish1:'蒸蛋佐肉燥',veg:'炒高麗菜',cal:520,pro:22,fat:15,carb:72,na:680,fiber:4.5,editor:'系統預設'},
+  {date:'2025-05-26',type:'晚餐',main:'稀飯',dish1:'清蒸魚片',veg:'炒菠菜',cal:480,pro:28,fat:10,carb:58,na:540,fiber:3.8,editor:'系統預設'},
+  {date:'2025-05-27',type:'早餐',main:'稀飯',dish1:'豆干',cal:310,pro:10,fat:6,carb:52,na:380,fiber:1.5,editor:'系統預設'},
+  {date:'2025-05-27',type:'午餐',main:'白飯',dish1:'滷雞腿',veg:'燙青菜',cal:560,pro:30,fat:18,carb:65,na:720,fiber:4.0,editor:'系統預設'},
+  {date:'2025-05-28',type:'午餐',main:'排骨湯麵',veg:'燙青菜',cal:510,pro:20,fat:13,carb:70,na:660,fiber:4.2,editor:'系統預設'},
+  {date:'2025-05-29',type:'午餐',main:'白飯',dish1:'魚片炒飯',veg:'燙花椰菜',cal:540,pro:24,fat:14,carb:74,na:640,fiber:4.8,editor:'系統預設'},
+  {date:'2025-05-30',type:'午餐',main:'稀飯',dish1:'炸豆腐',veg:'炒空心菜',cal:470,pro:18,fat:12,carb:68,na:590,fiber:5.0,editor:'系統預設'},
+  {date:'2025-05-31',type:'早餐',main:'稀飯',side1:'醬菜',cal:260,pro:8,fat:4,carb:48,na:520,fiber:2.1,editor:'系統預設'},
+  {date:'2025-05-31',type:'午餐',main:'白飯（軟煮）',dish1:'蒸蛋佐肉燥',veg:'炒高麗菜',cal:520,pro:22,fat:15,carb:72,na:680,fiber:4.5,editor:'系統預設'},
+].forEach(m=>menuData[mk(m.date,m.type)]=m);
+
+const mealRecs=[
+  {date:'2025-05-31',label:'05/31',records:[
+    {time:'07:30',type:'早餐',cases:'王大明、李小花',cat:'主食',item:'稀飯、醬菜',desc:'軟煮稀飯搭配醬菜',cal:'260.0',pro:'8.5',fat:'4.2',carb:'48.0',na:'520.0',fiber:'2.1',editor:'陳照護員'},
+    {time:'12:10',type:'午餐',cases:'王大明、李小花、張阿伯',cat:'主菜',item:'蒸蛋佐肉燥',desc:'軟質蒸蛋配肉燥醬汁',cal:'520.0',pro:'22.5',fat:'15.2',carb:'72.0',na:'680.0',fiber:'4.5',editor:'陳照護員'},
+  ]},
+  {date:'2025-05-30',label:'05/30',records:[
+    {time:'07:25',type:'早餐',cases:'王大明、張阿伯',cat:'主食',item:'麵線糊',desc:'麵線糊加海鮮',cal:'320.0',pro:'12.0',fat:'6.5',carb:'55.0',na:'610.0',fiber:'1.8',editor:'林護理師'},
+    {time:'12:05',type:'午餐',cases:'全體個案',cat:'主菜',item:'炸豆腐',desc:'軟炸豆腐搭配清炒空心菜',cal:'470.0',pro:'18.0',fat:'12.0',carb:'68.0',na:'590.0',fiber:'5.0',editor:'陳照護員'},
+  ]},
+  {date:'2025-05-29',label:'05/29',records:[
+    {time:'12:15',type:'午餐',cases:'王大明、李小花',cat:'主菜',item:'魚片炒飯',desc:'魚片炒飯加燙花椰菜',cal:'540.0',pro:'24.0',fat:'14.0',carb:'74.0',na:'640.0',fiber:'4.8',editor:'陳照護員'},
+  ]},
+];
+
+// 備餐名單資料，eat 為陣列（可多種進食型態）
+const prepData=[
+  {id:'[A]-000',name:'李林甘',group:'A',status:'服務中',eat:['軟質'],initial:'李'},
+  {id:'[A]-0001',name:'旗津微笑',group:'A',status:'服務中',eat:['一般'],initial:'旗'},
+  {id:'[A]-001',name:'簡智齡',group:'A',status:'服務中',eat:['打泥'],initial:'簡'},
+  {id:'[B]-005',name:'丁阿桃',group:'B',status:'服務中',eat:['剁碎'],initial:'丁'},
+  {id:'[B]-01',name:'高天華',group:'B',status:'服務中',eat:['一般','低鹽飲食'],initial:'高'},
+  {id:'[B]-1',name:'王美華',group:'B',status:'暫停服務',eat:['軟質'],initial:'王'},
+  {id:'[C]-002',name:'陳阿明',group:'C',status:'服務中',eat:['剪碎','糖尿病飲食'],initial:'陳'},
+  {id:'[C]-003',name:'黃春梅',group:'C',status:'結案',eat:['一般'],initial:'黃'},
+];
+
+let selectedEatTypes = [];
+
+function toggleEatDropdown(e){
+  e.stopPropagation();
+  document.getElementById('eat-dropdown').classList.toggle('open');
+}
+document.addEventListener('click', e=>{
+  if(!document.getElementById('eat-filter-wrap').contains(e.target)){
+    document.getElementById('eat-dropdown').classList.remove('open');
+  }
+});
+function updateEatLabel(){
+  const checked=[...document.querySelectorAll('#eat-dropdown input[type=checkbox]:checked')].map(c=>c.value);
+  const btn=document.getElementById('eat-filter-btn');
+  const lbl=document.getElementById('eat-filter-label');
+  if(checked.length===0){lbl.textContent='全部類型';btn.classList.remove('active-filter');}
+  else{lbl.textContent=checked.length===1?checked[0]:checked[0]+' +'+( checked.length-1);btn.classList.add('active-filter');}
+}
+function clearEatFilter(){
+  document.querySelectorAll('#eat-dropdown input[type=checkbox]').forEach(c=>c.checked=false);
+  selectedEatTypes=[];
+  updateEatLabel();
+  renderPrep();
+}
+function applyEatFilter(){
+  selectedEatTypes=[...document.querySelectorAll('#eat-dropdown input[type=checkbox]:checked')].map(c=>c.value);
+  document.getElementById('eat-dropdown').classList.remove('open');
+  renderPrep();
+}
+
+function showPage(p){
+  document.querySelectorAll('.pg').forEach(e=>e.classList.remove('active'));
+  document.getElementById('pg-'+p).classList.add('active');
+  document.getElementById('topbar-title').textContent=p==='prep'?'備餐名單':'膳食管理';
+  if(p==='prep')renderPrep();
+}
+function switchTab(t){
+  document.getElementById('tab-w').classList.toggle('active',t==='w');
+  document.getElementById('tab-m').classList.toggle('active',t==='m');
+  document.getElementById('tc-w').classList.toggle('active',t==='w');
+  document.getElementById('tc-m').classList.toggle('active',t==='m');
+}
+function buildWeekOptions(){
+  const s=new Date(document.getElementById('fd-start').value);
+  const e=new Date(document.getElementById('fd-end').value);
+  const weeks=[];let mon=getMonday(e);const smon=getMonday(s);
+  while(mon>=smon){weeks.push(new Date(mon));mon.setDate(mon.getDate()-7)}
+  const sel=document.getElementById('week-sel');
+  sel.innerHTML=weeks.map((m,i)=>{const sun=new Date(m);sun.setDate(sun.getDate()+6);return`<option value="${i}">${fmtMD(m)} ~ ${fmtMD(sun)}</option>`}).join('');
+  sel._weeks=weeks;renderGrid();
+}
+function onDateChange(){
+  const s=new Date(document.getElementById('fd-start').value);
+  const e=new Date(document.getElementById('fd-end').value);
+  if((e-s)/864e5>31){const a=new Date(s);a.setDate(a.getDate()+31);document.getElementById('fd-end').value=fmtDate(a);showSnack('區間不可超過 31 天，已自動調整')}
+  buildWeekOptions();
+}
+function renderGrid(){
+  const sel=document.getElementById('week-sel');if(!sel._weeks||!sel._weeks.length)return;
+  const mon=sel._weeks[parseInt(sel.value)||0];
+  document.getElementById('week-grid').innerHTML=WDS.map((wd,i)=>{
+    const d=new Date(mon);d.setDate(d.getDate()+i);const ds=fmtDate(d);
+    const chips=['早餐','早點','午餐','午點','晚餐','晚點'].filter(t=>menuData[mk(ds,t)]).map(t=>{
+      const m=menuData[mk(ds,t)];
+      const name=[m.main,m.dish1,m.veg].filter(Boolean).join('、');
+      return`<div class="meal-chip" onclick="openMenuEdit('${ds}','${t}')"><div class="chip-type">${t}</div><div class="chip-name">${name}</div>${m.cal?`<div class="chip-cal">${parseFloat(m.cal).toFixed(1)} 大卡</div>`:''}</div>`;
+    }).join('');
+    return`<div class="day-col">
+      <div class="day-head"><div class="day-wd">週${wd}</div><div class="day-dt">${fmtMD(d)}</div></div>
+      <div class="day-body">${chips}<div class="add-btn" onclick="openMenuAdd('${ds}','週${wd}')"><i class="ti ti-plus"></i> 新增</div></div>
+    </div>`;
+  }).join('');
+}
+
+function openDlg(id){document.getElementById(id).classList.add('open')}
+function closeDlg(id){document.getElementById(id).classList.remove('open')}
+function onBackdropClick(e,id){if(e.target===document.getElementById(id))closeDlg(id)}
+
+function openExportDlg(){
+  // 同步日期範圍
+  document.getElementById('exp-start').value=document.getElementById('fd-start').value;
+  document.getElementById('exp-end').value=document.getElementById('fd-end').value;
+  openDlg('dlg-export');
+}
+
+function openMenuAdd(ds,wd){
+  document.getElementById('dlg-menu-title').textContent='新增菜單';
+  document.getElementById('mf-date').value=ds;
+  document.getElementById('mf-wd').value=wd;
+  document.getElementById('mf-type').value='';
+  document.getElementById('mf-type').disabled=false;
+  ['mf-main','mf-dish1','mf-side1','mf-side2','mf-veg','mf-dessert','mf-cal','mf-pro','mf-fat','mf-carb','mf-na','mf-fiber'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('mf-editor').value='';
+  document.getElementById('mf-type-err').style.display='none';
+  document.getElementById('mf-main-err').style.display='none';
+  openDlg('dlg-menu');
+}
+function openMenuEdit(ds,mtype){
+  const m=menuData[mk(ds,mtype)];if(!m)return;
+  const d=new Date(ds);
+  document.getElementById('dlg-menu-title').textContent='編輯菜單';
+  document.getElementById('mf-date').value=ds;
+  document.getElementById('mf-wd').value='週'+WDS[d.getDay()===0?6:d.getDay()-1];
+  document.getElementById('mf-type').value=mtype;
+  document.getElementById('mf-type').disabled=true;
+  ['main','dish1','side1','side2','veg','dessert','cal','pro','fat','carb','na','fiber','editor'].forEach(f=>document.getElementById('mf-'+f).value=m[f]||'');
+  document.getElementById('mf-type-err').style.display='none';
+  document.getElementById('mf-main-err').style.display='none';
+  openDlg('dlg-menu');
+}
+function saveMenu(){
+  let ok=true;
+  const type=document.getElementById('mf-type').value;
+  if(!type){document.getElementById('mf-type-err').style.display='block';ok=false}else{document.getElementById('mf-type-err').style.display='none'}
+  const main=document.getElementById('mf-main').value.trim();
+  if(!main){document.getElementById('mf-main-err').style.display='block';ok=false}else{document.getElementById('mf-main-err').style.display='none'}
+  if(!ok)return;
+  const ds=document.getElementById('mf-date').value;
+  const nf=id=>parseFloat(document.getElementById(id).value)||0;
+  menuData[mk(ds,type)]={date:ds,type,main,
+    dish1:document.getElementById('mf-dish1').value,side1:document.getElementById('mf-side1').value,
+    side2:document.getElementById('mf-side2').value,veg:document.getElementById('mf-veg').value,
+    dessert:document.getElementById('mf-dessert').value,
+    cal:nf('mf-cal'),pro:nf('mf-pro'),fat:nf('mf-fat'),
+    carb:nf('mf-carb'),na:nf('mf-na'),fiber:nf('mf-fiber'),editor:'測試人員'};
+  closeDlg('dlg-menu');renderGrid();showSnack('菜單已儲存');
+}
+
+function renderMealList(){
+  document.getElementById('meal-list').innerHTML=mealRecs.map((d,di)=>`
+    <div class="meal-date-row" onclick="toggleRec(${di})">
+      <i class="ti ti-calendar-event" style="font-size:15px;color:#1a7a6e"></i>
+      <span class="meal-date-lbl">${d.label}</span>
+      <span class="meal-date-cnt">${d.records.length} 筆</span>
+      <i class="ti ti-chevron-down mdchev ${di===0?'open':''}" id="chev-${di}"></i>
+    </div>
+    <div class="meal-recs ${di===0?'open':''}" id="recs-${di}">
+      ${d.records.map((r,ri)=>`<div class="meal-rec-row" onclick="openRec(${di},${ri})">
+        <span class="rec-time">${r.time}</span>
+        <span class="rec-badge">${r.type}</span>
+        <span class="rec-cases">${r.cases}</span>
+        <span class="rec-cal">${r.cal} 大卡</span>
+        <span class="rec-editor">${r.editor}</span>
+        <i class="ti ti-chevron-right" style="font-size:14px;color:#ccc;flex-shrink:0;margin-left:auto"></i>
+      </div>`).join('')}
+    </div>`).join('');
+}
+function toggleRec(di){document.getElementById('recs-'+di).classList.toggle('open');document.getElementById('chev-'+di).classList.toggle('open')}
+function openRec(di,ri){
+  const r=mealRecs[di].records[ri];const d=mealRecs[di];
+  document.getElementById('dlg-rec-title').textContent=d.label+' '+r.time+' '+r.type;
+  document.getElementById('rd-date').value=d.date;document.getElementById('rd-time').value=r.time;
+  document.getElementById('rd-type').value=r.type;document.getElementById('rd-cases').value=r.cases;
+  document.getElementById('rd-cat').value=r.cat;document.getElementById('rd-item').value=r.item;
+  document.getElementById('rd-desc').value=r.desc;
+  ['cal','pro','fat','carb','na','fiber','editor'].forEach(f=>document.getElementById('rd-'+f).value=r[f]);
+  openDlg('dlg-rec');
+}
+
+function renderPrep(){
+  const group=document.getElementById('pf-group').value;
+  const status=document.getElementById('pf-status').value;
+  const search=document.getElementById('pf-search').value.trim();
+  const eatFilter=selectedEatTypes; // 已套用的進食型態
+
+  const f=prepData.filter(p=>{
+    if(group && p.group!==group) return false;
+    if(status && p.status!==status) return false;
+    if(search && !p.name.includes(search)) return false;
+    // 進食型態：OR 邏輯，個案 eat 陣列中有任一符合即顯示
+    if(eatFilter.length>0 && !eatFilter.some(t=>p.eat.includes(t))) return false;
+    return true;
+  });
+
+  // 顯示 active filter tags
+  const tagsEl=document.getElementById('prep-active-tags');
+  if(eatFilter.length>0){
+    tagsEl.style.display='flex';
+    tagsEl.innerHTML=eatFilter.map(t=>`<span style="display:inline-flex;align-items:center;gap:4px;background:#e8f5f3;color:#0f5248;font-size:12px;padding:3px 10px;border-radius:20px;">${t} <span onclick="removeEatTag('${t}')" style="cursor:pointer;color:#1a7a6e;font-size:14px;line-height:1">×</span></span>`).join('');
+  } else {
+    tagsEl.style.display='none';
+    tagsEl.innerHTML='';
+  }
+
+  document.getElementById('prep-list').innerHTML=f.length
+    ?f.map(p=>`<div class="prep-row">
+        <div class="prep-av">${p.initial}</div>
+        <div class="prep-info">
+          <div class="prep-id-lbl">${p.id}</div>
+          <div class="prep-name-lbl">${p.name}</div>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:3px">${p.eat.map(e=>`<span class="prep-eat-badge">${e}</span>`).join('')}</div>
+        </div>
+        <span class="prep-status">${p.status}</span>
+        <button class="prep-edbtn" onclick="showSnack('前往 ${p.name} 的定期評估－身體評估')">編輯</button>
+      </div>`).join('')
+    :'<div style="padding:20px;text-align:center;color:#aaa;font-size:13px">無符合條件的個案</div>';
+}
+
+function removeEatTag(t){
+  selectedEatTypes=selectedEatTypes.filter(x=>x!==t);
+  // 同步 checkbox
+  const cb=document.querySelector(`#eat-dropdown input[value="${t}"]`);
+  if(cb)cb.checked=false;
+  updateEatLabel();
+  renderPrep();
+}
+
+let snackT;
+function showSnack(msg){
+  const s=document.getElementById('snack');s.textContent=msg;s.style.display='block';
+  clearTimeout(snackT);snackT=setTimeout(()=>s.style.display='none',2200);
+}
+
+buildWeekOptions();renderMealList();
+</script>
+</body>
+</html>
